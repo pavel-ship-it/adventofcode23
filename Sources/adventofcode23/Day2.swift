@@ -33,21 +33,18 @@ extension String {
         return result
     }
 
-    func d2p2gameResult() -> Bool {
-        let expectation = (12, 13, 14)
+    func d2p2gameResult() -> Int {
         // Game 95: 5 blue, 2 red, 9 green; ...
-        guard let q = self.firstIndex(of: ":") else { return false }
+        guard let q = self.firstIndex(of: ":") else { return 0 }
         // " 5 blue, 2 red, 9 green; ..."
         let result = self[q...].dropFirst()
         // [" 5 blue, 2 red, 9 green", ...]
             .split(separator: ";")
         // [2 9 5, ...]
             .map { String($0).parse() }
-        // true if ALL expectations are fulfiled
-            .map { $0.0 <= expectation.0 && $0.1 <= expectation.1 && $0.2 <= expectation.2 }
-        // true if all game sets are possible
-            .reduce(into: true) { $0 = $1 && $0 }
-        return result
+        // calc power
+            .reduce(into: (0, 0, 0)) { $0 = (max($0.0, $1.0), max($0.1, $1.1), max($0.2, $1.2)) }
+        return result.0 * result.1 * result.2
     }
 }
 
@@ -67,14 +64,8 @@ class Task3: Task {
 
 class Task4: Task {
     func calc(_ inputFile: String) -> Int {
-        let games = fileDataWithEmptyLines(inputFile)
+        fileDataWithEmptyLines(inputFile)
             .compactMap { $0.d2p2gameResult() }
-        var sum = 0
-        for (i, n) in games.enumerated() {
-            if n {
-                sum += i + 1
-            }
-        }
-        return sum
+            .reduce(0, +)
     }
 }
